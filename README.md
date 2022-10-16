@@ -2,9 +2,9 @@
 
 This project contains source code and supporting files for a serverless application that you can deploy with the SAM CLI. It includes the following files and folders.
 
-- src - Code for the application's Lambda function.
+- hello_world - Code for the application's Lambda function.
 - events - Invocation events that you can use to invoke the function.
-- test - Unit tests for the application code. 
+- tests - Unit tests for the application code. 
 - template.yaml - A template that defines the application's AWS resources.
 
 The application uses several AWS resources, including Lambda functions and an API Gateway API. These resources are defined in the `template.yaml` file in this project. You can update the template to add AWS resources through the same deployment process that updates your application code.
@@ -31,13 +31,13 @@ The Serverless Application Model Command Line Interface (SAM CLI) is an extensio
 To use the SAM CLI, you need the following tools.
 
 * SAM CLI - [Install the SAM CLI](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-cli-install.html)
-* .NET Core - [Install .NET Core](https://www.microsoft.com/net/download)
+* [Python 3 installed](https://www.python.org/downloads/)
 * Docker - [Install Docker community edition](https://hub.docker.com/search/?type=edition&offering=community)
 
 To build and deploy your application for the first time, run the following in your shell:
 
 ```bash
-sam build
+sam build --use-container
 sam deploy --guided
 ```
 
@@ -53,13 +53,13 @@ You can find your API Gateway Endpoint URL in the output values displayed after 
 
 ## Use the SAM CLI to build and test locally
 
-Build your application with the `sam build` command.
+Build your application with the `sam build --use-container` command.
 
 ```bash
-hoge1017sam$ sam build
+hoge1017sam$ sam build --use-container
 ```
 
-The SAM CLI installs dependencies defined in `src/HelloWorld.csproj`, creates a deployment package, and saves it in the `.aws-sam/build` folder.
+The SAM CLI installs dependencies defined in `hello_world/requirements.txt`, creates a deployment package, and saves it in the `.aws-sam/build` folder.
 
 Test a single function by invoking it directly with a test event. An event is a JSON document that represents the input that the function receives from the event source. Test events are included in the `events` folder in this project.
 
@@ -102,12 +102,17 @@ hoge1017sam$ sam logs -n HelloWorldFunction --stack-name hoge1017sam --tail
 
 You can find more information and examples about filtering Lambda function logs in the [SAM CLI Documentation](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-cli-logging.html).
 
-## Unit tests
+## Tests
 
-Tests are defined in the `test` folder in this project.
+Tests are defined in the `tests` folder in this project. Use PIP to install the test dependencies and run tests.
 
 ```bash
-hoge1017sam$ dotnet test test/HelloWorld.Test
+hoge1017sam$ pip install -r tests/requirements.txt --user
+# unit test
+hoge1017sam$ python -m pytest tests/unit -v
+# integration test, requiring deploying the stack first.
+# Create the env variable AWS_SAM_STACK_NAME with the name of the stack we are testing
+hoge1017sam$ AWS_SAM_STACK_NAME=<stack-name> python -m pytest tests/integration -v
 ```
 
 ## Cleanup
@@ -115,7 +120,7 @@ hoge1017sam$ dotnet test test/HelloWorld.Test
 To delete the sample application that you created, use the AWS CLI. Assuming you used your project name for the stack name, you can run the following:
 
 ```bash
-sam delete --stack-name hoge1017sam
+aws cloudformation delete-stack --stack-name hoge1017sam
 ```
 
 ## Resources
